@@ -16,11 +16,11 @@ public class CreditsPanel extends JPanel {
 	private int t = 0, topThreshold = 10;
 	private ResultSet rs;
 	private float hScale,vScale;
-	private JFrame creditsFrame;
+	private JFrame omniFrame;
 	
-	public CreditsPanel(JFrame creditsFrame) {
+	public CreditsPanel(JFrame omniFrame) {
 		super();
-		this.creditsFrame = creditsFrame;
+		this.omniFrame = omniFrame;
 	}
 	
 	public void refresh(int tt) {
@@ -50,8 +50,8 @@ public class CreditsPanel extends JPanel {
 		
 		Graphics2D g2 = (Graphics2D) g;
 
-		vScale = (float) creditsFrame.getHeight()/768;
-		hScale = (float) creditsFrame.getWidth()/1024;
+		vScale = (float) omniFrame.getHeight()/768;
+		hScale = (float) omniFrame.getWidth()/1024;
 		g2.scale(hScale, vScale);
 		
 		// White background

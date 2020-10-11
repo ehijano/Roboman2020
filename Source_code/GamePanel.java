@@ -1,16 +1,14 @@
-import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -44,14 +42,21 @@ public class GamePanel extends JPanel {
 	private boolean  cstage = true, gameRun = true;
 	private static String  audioFolder = "sounds/events/", stagesFolder = "img/stages/", miscImgFolder="img/misc/";
 	private long startTime, stageTime, stageStartTime;
-	private JFrame frameg, framei;
 	private Clip clipDrip;
 	public Player player;
 	private float hScale,vScale;
-
-	public GamePanel(JFrame frameg, JFrame framei) {
-		this.frameg = frameg;
-		this.framei = framei;
+	private CardLayout omniLayout;
+	private JPanel omniPanel;
+	private JFrame omniFrame;
+	private VictoryPanel vp;
+	private GameOverPanel gop;
+	
+	public GamePanel(CardLayout omniLayout, JPanel omniPanel, JFrame omniFrame, VictoryPanel vp, GameOverPanel gop) {
+		this.omniLayout = omniLayout;
+		this.omniPanel = omniPanel;
+		this.omniFrame = omniFrame;
+		this.vp = vp;
+		this.gop = gop;
 		
 		//Audio
 		try {
@@ -548,11 +553,7 @@ public class GamePanel extends JPanel {
 	}
 	
 	public void menuScreen() {
-		framei.setSize(frameg.getSize());
-		framei.setLocation(frameg.getLocation());
-		
-		frameg.setVisible(false);
-		framei.setVisible(true);
+		omniLayout.show(omniPanel,"MENU");
 	}
 	
 	public void finalScreen() {
@@ -560,40 +561,26 @@ public class GamePanel extends JPanel {
 		
 		long elapsed = System.currentTimeMillis()- startTime;
 		
-		JFrame vf = new JFrame();
-		vf.setMinimumSize(new Dimension(800,600));
-		vf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		vp.receiveScore(player.score,elapsed);
 		
-		VictoryPanel vp = new VictoryPanel(this, vf,frameg, player.score, elapsed);
+		vp.setSize(omniFrame.getSize());
 		
-		Container cont = vf.getContentPane();
-		cont.add(vp, BorderLayout.CENTER);
+		omniLayout.show(omniPanel,"VICTORY");
+		vp.requestFocus();
 		
-		vf.setSize(frameg.getSize());
-		vf.setLocation(frameg.getLocation());
-		vp.setSize(frameg.getSize());
-		vf.setVisible(true);
-		
-		frameg.setVisible(false);
+		resetGame();
 	}
 	
 	public void gameOverScreen() {
 		long elapsed = ((new Date()).getTime() - startTime)/1000;
 		
-		JFrame gof = new JFrame();
-		gof.setSize(frameg.getSize());
-		gof.setLocation(frameg.getLocation());
-		gof.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		gop.receiveScore(player.score,elapsed);
 		
-		GameOverPanel gop = new GameOverPanel(this,gof,frameg,player.score,elapsed);
-		gop.setSize(gof.getSize());
+		gop.setSize(omniFrame.getSize());
 		
 		
-		Container cont = gof.getContentPane();
-		cont.add(gop,BorderLayout.CENTER);
-		
-		frameg.setVisible(false);
-		gof.setVisible(true);
+		omniLayout.show(omniPanel,"GAMEOVER");
+		gop.requestFocus();
 	}
 
 	public void generateDrip(int xxx) {
@@ -760,9 +747,10 @@ public class GamePanel extends JPanel {
 		chooseStage();
 		
 		Graphics2D g2 = (Graphics2D) g;
-
-		vScale = (float) frameg.getHeight()/768;
-		hScale = (float) frameg.getWidth()/1024;
+		
+		Insets decoration = omniFrame.getInsets();
+		vScale = (float) (omniFrame.getHeight()- decoration.top - decoration.bottom)/768;
+		hScale = (float) (omniFrame.getWidth()- decoration.left - decoration.right)/1024;
 		g2.scale(hScale, vScale);
 		
 		// stageTime += 1;

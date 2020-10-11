@@ -1,3 +1,4 @@
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -22,22 +23,29 @@ class Game extends Thread {
 	private static double xMoonInvader = 760, yMoonInvader = 768 - 50 - 384,tita = 0;
 	private boolean MItakeoff = false,isRight = false, isLeft = false;
 	private static boolean clicking = false;
-	JFrame frameg,framei;
+
 	private static String audioFolder = "sounds/events/";
 	private volatile boolean exit = false;
 	private Clip clipTO;
 	private Player player;
 	private float hScale,vScale;
+	JFrame omniFrame;
+	private long timePerFrame,frameTime;
+	private int walkingDir = 0;
 	
-	public Game(GamePanel gpanel, JFrame frameg, JFrame framei) {
+	public Game(GamePanel gpanel, JFrame omniFrame) {
+		this.omniFrame = omniFrame;
+		
+		// Force 60fps (Time here is in Milliseconds)
+		timePerFrame = 1000/100;
 		
 		// Initialize
-		this.frameg = frameg;
-		this.framei = framei;
 		Game.gpanel = gpanel;
 		
-		vScale = (float) frameg.getHeight()/768;
-		hScale = (float) frameg.getWidth()/1024;
+		player = gpanel.getPlayer();
+		
+		vScale = (float) omniFrame.getHeight()/768;
+		hScale = (float) omniFrame.getWidth()/1024;
 		
 		//Sound clips
 		try {
@@ -46,13 +54,10 @@ class Game extends Thread {
 			e.printStackTrace();
 		}
 		
-		gpanel.setVisible(true);
-		
 		adapterMouse = new GameMouseAdapter();
 		listenerKey = new GameKeyListener();
 		listenerMouseMotion = new GameMouseMotionListener();
 		listenerMouseWheel = new GameMouseWheelListener();
-		frameg.addKeyListener(listenerKey);
 		gpanel.addKeyListener(listenerKey);
 		gpanel.addMouseListener(adapterMouse);
 		gpanel.addMouseMotionListener(listenerMouseMotion);
@@ -70,18 +75,10 @@ class Game extends Thread {
 		clipTO.start();
 	}
 
-	public static int getl() {
-		return dir;
-	}
 	
 	
 	public void stopRun() {
 		exit = true;
-	}
-	
-	public void menuScreen() {
-		frameg.setVisible(false);
-		framei.setVisible(true);
 	}
 	
 	private void finishStage(int stage) {
@@ -107,66 +104,74 @@ class Game extends Thread {
 		long startTime = System.currentTimeMillis();
 		gpanel.receiveStartTime(startTime);
 		
+		frameTime = System.currentTimeMillis();
+		
 		while ((!exit)) {
 			
-			player = gpanel.getPlayer();
-			
-			listenerMouseMotion.settita();
-			
-			player.setState(isRight,isLeft,dir,clicking);
-			
-			player.update();
-
-			if (MItakeoff) {
-				if (yMoonInvader == 768 - 50 - 384) {
-					playTakeOff();
-				}
-				player.setVisible(false);
-				yMoonInvader -= 0.0005;
-				gpanel.moonInvader(xMoonInvader, yMoonInvader);
-				if (yMoonInvader + 384 < 0) {
-					MItakeoff = false;
-					player.setVisible(true);
-					player.setLocation(100, 713);
-					gpanel.changeStage();
-				}
-
-			} else {
+			if (System.currentTimeMillis()-frameTime>timePerFrame) {
+				frameTime = System.currentTimeMillis();
 				
-				int stage = gpanel.getstage();
+				player = gpanel.getPlayer();
 				
-				if ((player.x > 1024 - 30) && (gpanel.isStageClear())) {// Stage ends
-					finishStage(stage);
-				}else if ( ((stage ==  2)||(stage==13))&&(player.y>713) ) {// River death
-					player.heal(-player.health);
-				}else if ((player.x > 729) && (stage == 14)) {// Moon Invader
+				listenerMouseMotion.settita();
+				
+				player.setState(isRight,isLeft,dir,walkingDir,clicking);
+				
+				player.update();
+	
+				if (MItakeoff) {
+					if (yMoonInvader == 768 - 50 - 384) {
+						playTakeOff();
+					}
 					player.setVisible(false);
-					MItakeoff = true;
-				}else {// Otherwise respect screen bounds
-					player.fixOutOfBounds();
+					yMoonInvader -= (int) 500/(2000.0/timePerFrame);
+					gpanel.moonInvader(xMoonInvader, yMoonInvader);
+					if (yMoonInvader + 384 < 0) {
+						MItakeoff = false;
+						player.setVisible(true);
+						player.setLocation(100, 713);
+						gpanel.changeStage();
+					}
+	
+				} else {
+					
+					int stage = gpanel.getstage();
+					
+					if ((player.x > 1024 - 30) && (gpanel.isStageClear())) {// Stage ends
+						finishStage(stage);
+					}else if ( ((stage ==  2)||(stage==13))&&(player.y>713) ) {// River death
+						player.heal(-player.health);
+					}else if ((player.x > 729) && (stage == 14)) {// Moon Invader
+						player.setVisible(false);
+						MItakeoff = true;
+					}else {// Otherwise respect screen bounds
+						player.fixOutOfBounds();
+					}
+					
+					/*
+					try {
+						sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					*/
 				}
 				
-				try {
-					sleep(10);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				
+				gpanel.repaint();
+				
+				// Game over
+				if (player.health == 0) {
+					stopRun();
+					gpanel.gameOverScreen();
 				}
-			}
-			
-			
-			gpanel.repaint();
-			
-			// Game over
-			if (player.health == 0) {
-				stopRun();
-				gpanel.gameOverScreen();
-			}
-			
-			// Did game end?
-			if (!gpanel.checkGameRun()) {
-				//gpanel.resetGame();
-				//menuScreen();
-				stopRun();
+				
+				// Did game end?
+				if (!gpanel.checkGameRun()) {
+					//gpanel.resetGame();
+					//menuScreen();
+					stopRun();
+				}
 			}
 		}
 
@@ -176,6 +181,9 @@ class Game extends Thread {
 		MouseEvent egeneral;
 
 		public void mouseMoved(MouseEvent e) {
+			Insets decoration = omniFrame.getInsets();
+			vScale = (float) (omniFrame.getHeight()- decoration.top - decoration.bottom)/768;
+			hScale = (float) (omniFrame.getWidth()- decoration.left - decoration.right)/1024;
 			double posx = e.getX()/hScale;
 			double posy = e.getY()/vScale;
 			double tita = Math.atan((player.y + 25 - posy) / (posx - player.x - 15));
@@ -184,6 +192,9 @@ class Game extends Thread {
 		}
 
 		public void mouseDragged(MouseEvent e) {
+			Insets decoration = omniFrame.getInsets();
+			vScale = (float) (omniFrame.getHeight()- decoration.top - decoration.bottom)/768;
+			hScale = (float) (omniFrame.getWidth()- decoration.left - decoration.right)/1024;
 			double posx = e.getX()/hScale;
 			double posy = e.getY()/vScale;
 			double tita = Math.atan((player.y + 25 - posy) / (posx - player.x - 15));
@@ -193,6 +204,9 @@ class Game extends Thread {
 
 		public void settita() {
 			if (egeneral != null) {
+				Insets decoration = omniFrame.getInsets();
+				vScale = (float) (omniFrame.getHeight()- decoration.top - decoration.bottom)/768;
+				hScale = (float) (omniFrame.getWidth()- decoration.left - decoration.right)/1024;
 				double posx = egeneral.getX()/hScale;
 				double posy = egeneral.getY()/vScale;
 				tita = Math.atan((player.y + 25 - posy) / (posx - player.x - 15));
@@ -201,7 +215,7 @@ class Game extends Thread {
 				
 				if((!isLeft)&&(!isRight)) {
 					if ((posx - player.x - 15 < 0)) {
-						dir=-1;
+						dir = -1;
 					} else {
 						dir = 1;
 					}
@@ -234,12 +248,14 @@ class Game extends Thread {
 				if (e.getKeyCode() == KeyEvent.VK_D) {
 					isRight = true;
 					isLeft = false;
-					dir = 1;
+					//dir = 1;
+					walkingDir = 1;
 				}
 				if (e.getKeyCode() == KeyEvent.VK_A) {
 					isLeft = true;
 					isRight = false;
-					dir = -1;
+					//dir = -1;
+					walkingDir = -1;
 				}
 				if ((e.getKeyCode() == KeyEvent.VK_SPACE)||(e.getKeyCode() == KeyEvent.VK_W)) {
 					player.jump();
@@ -247,7 +263,7 @@ class Game extends Thread {
 			}
 			if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 				gpanel.resetGame();
-				menuScreen();
+				gpanel.menuScreen();
 				stopRun();
 			}
 		}
@@ -255,9 +271,11 @@ class Game extends Thread {
 		public void keyReleased(KeyEvent e) {
 			if (e.getKeyCode() == KeyEvent.VK_D) {
 				isRight = false;
+				walkingDir = 0;
 			}
 			if (e.getKeyCode() == KeyEvent.VK_A) {
 				isLeft = false;
+				walkingDir = 0;
 			}
 		}
 

@@ -19,7 +19,7 @@ import javax.swing.ImageIcon;
 
 public class Player {
 	protected double tita = 0, speedV = 0.0; 
-	protected int currentWeapon = 0, currentHelmet = 0, dir=1, animationTime = 10, animationCount = 0;
+	protected int currentWeapon = 0, currentHelmet = 0, dir=1,walkingDir = 0, animationTime = 10, animationCount = 0;
 	protected int health=100, shield=0, ammo = 100, score=0, x = 10, y= 713, y0, speedH=2, animationNumber = 1;
 	protected long jumpTime=0;
 	
@@ -117,7 +117,7 @@ public class Player {
 		// Movement 
 		if (((isWalkingRight)||(isWalkingLeft)) && (!jumping) && (!falling)) {
 			speedV = 0;
-			x += dir*speedH;
+			x += walkingDir*speedH;
 			animateWalking();
 			
 		} else if (jumping) {// Normal jump
@@ -137,13 +137,13 @@ public class Player {
 			long t = (currentTime - jumpTime)/10;
 			
 			y = (int) (y0 - (20 * t - 0.5 * gravity * t * t));
-			x = (int) (x + t * dir * drag);
+			x = (int) (x + t * walkingDir * drag);
 			speedV = 20 - 2 * 0.5 * gravity * t;
 			
 		} else if (falling) {
 			long t = (currentTime - jumpTime)/10;
 			y = (int) (y0 - (-0.5 * 0.7 * t * t));
-			x = (int) (x + t * dir * 0.1);
+			x = (int) (x + t * walkingDir * 0.1);
 			speedV = -2 * 0.5 * 0.7 * t;
 		}
 	}
@@ -164,10 +164,11 @@ public class Player {
 		
 	}
 	
-	public void setState(boolean iR, boolean iL, int d, boolean c) {
+	public void setState(boolean iR, boolean iL, int d,int wd, boolean c) {
 		isWalkingRight = iR;
 		isWalkingLeft = iL;
 		dir = d;
+		walkingDir = wd;
 		clicking = c;
 	}
 	
@@ -269,7 +270,7 @@ public class Player {
 
 	public void drawHUD(Graphics2D g2, int x0, int y0) {
 		// Background
-		Rectangle2D raux = new Rectangle2D.Double(x0, y0, 350, 100);
+		Rectangle2D raux = new Rectangle2D.Double(x0, y0, 360, 100);
 		g2.setPaint(Color.white);
 		g2.fill(raux);
 		
@@ -279,13 +280,17 @@ public class Player {
 
 		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,(float) 0.5));
 		if (currentPosition>0) {
-			g2.drawImage(vWeaponImages.elementAt(availableWeapons.elementAt(currentPosition-1)).getImage(),x0+ 280, y0+10, null);
+			g2.drawImage(vWeaponImages.elementAt(availableWeapons.elementAt(currentPosition-1)).getImage(),x0+ 245, y0+10, null);
 		}
 		if (currentPosition<availableWeapons.size()-1) {
-			g2.drawImage(vWeaponImages.elementAt(availableWeapons.elementAt(currentPosition+1)).getImage(),x0+ 280, y0+70, null);
+			g2.drawImage(vWeaponImages.elementAt(availableWeapons.elementAt(currentPosition+1)).getImage(),x0+ 245, y0+70, null);
 		}
 		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,(float) 1.0));
-		g2.drawImage(vWeaponImages.elementAt(currentWeapon).getImage(),x0+ 280, y0+40, null);
+		g2.drawImage(vWeaponImages.elementAt(currentWeapon).getImage(),x0+ 245, y0+40, null);
+		g2.setPaint(Color.black);
+		g2.drawString("Damage:", x0+310 ,y0+ 40);
+		g2.setPaint(Color.red);
+		g2.drawString(Integer.toString(weapon.power()), x0+310 ,y0+ 60);
 		
 		weapon.drawExtras(g2,x0,y0);
 		
@@ -385,7 +390,6 @@ public class Player {
 		public void drawExtras(Graphics2D g2,int x0,int y0) {
 			
 		}
-		
 	}
 	
 	private class Pistol extends Weapon{

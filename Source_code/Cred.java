@@ -1,3 +1,4 @@
+import java.awt.CardLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
@@ -23,11 +24,14 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 public class Cred extends Thread {
 	CredKeyListener listenerKey;
 	static CreditsPanel gpanel2;
 	JFrame frameg2, framei;
+	CardLayout omniLayout;
+	JPanel omniPanel;
 	private int t = 0;
 	private Connection dbConnection = null; 
 	private String tableName;
@@ -65,11 +69,9 @@ public class Cred extends Thread {
 		try { 
 			Properties props = getConnectionData();
 			
-			// Choose your salt seed!
-			byte[] salt = new String("0123456789").getBytes();
+			byte[] salt = new String("12345678").getBytes();
 			int iterationCount = 40000;
-			// Choose your key password!
-			String keypassword = "ChooseKeyPassword";
+			String keypassword = "Whatisthis";
 			int keyLength = 128;
 	        SecretKeySpec key = createSecretKey(keypassword.toCharArray(), salt, iterationCount, keyLength);
 	        
@@ -111,12 +113,12 @@ public class Cred extends Thread {
         return rs;
     }
 
-	public Cred(CreditsPanel gpanel2, JFrame frameg2, JFrame framei)  {
-		this.frameg2 = frameg2;
+	public Cred(CreditsPanel gpanel2, CardLayout omniLayout, JPanel omniPanel)  {
+		this.omniLayout = omniLayout;
+		this.omniPanel = omniPanel;
 		Cred.gpanel2 = gpanel2;
-		this.framei = framei;
 		listenerKey = new CredKeyListener();
-		frameg2.addKeyListener(listenerKey);
+		//frameg2.addKeyListener(listenerKey);
 		gpanel2.addKeyListener(listenerKey);
 		
 		// Load DataBase
@@ -157,10 +159,7 @@ public class Cred extends Thread {
 	private class CredKeyListener implements KeyListener {
 		public void keyPressed(KeyEvent e) {
 			if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-				framei.setLocation(frameg2.getLocation());
-				framei.setSize(frameg2.getSize());
-				frameg2.setVisible(false);
-				framei.setVisible(true);
+				omniLayout.show(omniPanel,"MENU");
 				stopRun();
 			}
 		}

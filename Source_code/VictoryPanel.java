@@ -1,3 +1,4 @@
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -48,21 +49,20 @@ public class VictoryPanel extends JPanel{
 	 */
 	private static final long serialVersionUID = 1L;
 	private int score;
-	GamePanel gp;
-	JFrame vf;
+
 	private boolean submitted = false;
 	private Connection dbConnection = null; 
 	private String formattedTime;
+	private long elapsed;
+	private JFrame omniFrame;
 	
-	public VictoryPanel(GamePanel gp, JFrame vf, JFrame frameg,int score, long elapsed) {
+	
+	public VictoryPanel(CardLayout omniLayout,JPanel omniPanel,JFrame omniFrame, MenuPanel menuPanel) {
 		super();
-		this.score = score;
-		//this.elapsed = elapsed;
-		this.gp = gp;
-		this.vf = vf;
-		submitted=false;
 		
-		formattedTime = formatTime(elapsed);
+		this.omniFrame = omniFrame;
+
+		submitted=false;
 		
 		repaint();
 		
@@ -75,14 +75,8 @@ public class VictoryPanel extends JPanel{
 		exitButton.setForeground(Color.white);
 		exitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				frameg.setSize(vf.getSize());
-				frameg.setLocation(vf.getLocation());
-				gp.setSize(vf.getSize());
-				
-				vf.setVisible(false);
-				gp.resetGame();
-				gp.menuScreen();
-				//System.exit(0);
+				omniLayout.show(omniPanel,"MENU");
+				menuPanel.requestFocus();
 			}
 		});
 		
@@ -150,6 +144,12 @@ public class VictoryPanel extends JPanel{
 		add(Box.createRigidArea(new Dimension(10, 0)));
 	}
 	
+	public void receiveScore(int score, long elapsed) {
+		this.score = score;
+		this.elapsed = elapsed;
+		formattedTime = formatTime(elapsed);
+	}
+	
 	private boolean validateName(String s) {
 		return true;
 	}
@@ -195,8 +195,8 @@ public class VictoryPanel extends JPanel{
 	
 	public void paintComponent(Graphics g) {
 		
-		float vScale = (float) vf.getHeight()/768;
-		float hScale = (float) vf.getWidth()/1024;
+		float vScale = (float) omniFrame.getHeight()/768;
+		float hScale = (float) omniFrame.getWidth()/1024;
 		
 		// Background
 		Rectangle2D r = new Rectangle2D.Double(0, 0, 1024*hScale, 768*vScale);

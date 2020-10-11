@@ -1,11 +1,10 @@
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Date;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -16,23 +15,44 @@ public class GameOverPanel extends JPanel{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	GamePanel gp;
-	JFrame frameg,gof;
 	private float hScale,vScale;
-	private long endTime;
 	private GOKeyListener listenerKey;
+	private long elapsed;
+	private CardLayout omniLayout;
+	private JPanel omniPanel;
+	private JFrame omniFrame;
+	private MenuPanel menuPanel;
 	
-	public GameOverPanel(GamePanel gp, JFrame gof, JFrame frameg,int score,long elapsed) {
+	public GameOverPanel(CardLayout omniLayout,JPanel omniPanel,JFrame omniFrame,MenuPanel menuPanel) {
 		super();
 		
-		this.gp = gp;
-		this.gof = gof;
-		this.frameg = frameg;
+		this.omniFrame = omniFrame;
+		this.omniLayout = omniLayout;
+		this.omniPanel = omniPanel;
+		this.omniPanel = omniPanel;
+		this.menuPanel = menuPanel;
 		
 		listenerKey = new GOKeyListener();
-		gof.addKeyListener(listenerKey);
 		
-		endTime = (new Date()).getTime();
+		addKeyListener(listenerKey);
+	}
+	
+	public void receiveScore(int score,long elapsed) {
+		//this.score = score;
+		this.elapsed = elapsed;
+	}
+	
+	private String formatTime(long t) {
+		long elapsed = (t)/1000;
+		int seconds = (int) (elapsed%60);
+		int minutes = (int) ((elapsed - seconds)/60.0);
+		
+		String zeroS = "";
+		String zeroM = "";
+		if (seconds < 10) {zeroS="0";}else {zeroS="";}
+		if (minutes < 10) {zeroM="0";}else {zeroM="";}
+		
+		return zeroM+Integer.toString(minutes)+":"+zeroS+Integer.toString(seconds);
 	}
 	
 	public void paint(Graphics g) {
@@ -40,15 +60,15 @@ public class GameOverPanel extends JPanel{
 
 		Graphics2D g2 = (Graphics2D) g;
 		
-		vScale = (float) gof.getHeight()/768;
-		hScale = (float) gof.getWidth()/1024;
+		vScale = (float) omniFrame.getHeight()/768;
+		hScale = (float) omniFrame.getWidth()/1024;
 		g2.scale(hScale, vScale);
 		
 		ImageIcon imgover = new ImageIcon(getClass().getResource("img/misc/"+"gameover.png"));
 		g2.drawImage(imgover.getImage(), (int) 0, (int) 0, null);
 		g2.setFont(new Font("Arial", Font.PLAIN, 50));
 		g2.setPaint(Color.red);
-		g2.drawString("Time wasted: "+ gp.formatTime(endTime), 500, 500);
+		g2.drawString("Time wasted: "+ formatTime(elapsed), 500, 500);
 		g2.setFont(new Font("Arial", Font.PLAIN, 20));
 		g2.drawString("(You could have been working...)", 500, 550);
 
@@ -57,13 +77,8 @@ public class GameOverPanel extends JPanel{
 	private class GOKeyListener implements KeyListener {
 		public void keyPressed(KeyEvent e) {
 			if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-				frameg.setLocation(gof.getLocation());
-				frameg.setSize(gof.getSize());
-				setSize(gof.getSize());
-				
-				gof.setVisible(false);
-				gp.resetGame();
-				gp.menuScreen();
+				omniLayout.show(omniPanel,"MENU");
+				menuPanel.requestFocus();
 			}
 		}
 
