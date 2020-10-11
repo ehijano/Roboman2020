@@ -54,7 +54,11 @@ public class GamePanel extends JPanel {
 		this.framei = framei;
 		
 		//Audio
-		loadSoundClips();
+		try {
+			clipDrip=loadSound(audioFolder+"goti.au");
+		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		}
 		
         // Images
 		imgNextStage = new ImageIcon(getClass().getResource(miscImgFolder+"flecha.png"));
@@ -128,38 +132,14 @@ public class GamePanel extends JPanel {
 			return 0.1;
 		}
 	}
-
-	private void loadSoundClips() {
-        
-		try {
-			InputStream in = getClass().getResourceAsStream(audioFolder+"goti.au");
-			InputStream bufferedIn = new BufferedInputStream(in);
-			AudioInputStream sourceAudioInputStream = AudioSystem.getAudioInputStream(bufferedIn);
-			// Changes all files to the same kind of output
-			// PCM_SIGNED 16000.0 Hz, 16 bit, mono, 2 bytes/frame, 8000.0 frames/second, little-endian
-	        AudioInputStream targetAudioInputStream=AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED, sourceAudioInputStream);
-	        AudioFormat targetFormat = new AudioFormat(new AudioFormat.Encoding("PCM_SIGNED"), 16000, 16, 1, 2, 8000, false);
-	        AudioInputStream targetAudioInputStream1 = AudioSystem.getAudioInputStream(targetFormat, targetAudioInputStream);
-	        DataLine.Info info = new DataLine.Info(Clip.class, targetAudioInputStream1.getFormat());
-	        clipDrip = (Clip) AudioSystem.getLine(info);
-	        clipDrip.addLineListener(event -> {
-	            if(LineEvent.Type.STOP.equals(event.getType())) {
-	            	clipDrip.flush();
-	            }
-	        });
-	        clipDrip.open(targetAudioInputStream1);
-		} catch (FileNotFoundException fnfe) {fnfe.printStackTrace();} catch (IOException ioe) { ioe.printStackTrace();
-		} catch (UnsupportedAudioFileException uafe) {uafe.printStackTrace(); } catch (LineUnavailableException lue) {lue.printStackTrace();}
-
-	}
 	
 	public void resetGame() {
-		stageTime = System.currentTimeMillis();
 		// booleans
 		gameRun = true;
 		
 		// Starting variables
 		stage = stageINI;
+		stageTime = System.currentTimeMillis();
 		
 		player = new Player(this);
 		
@@ -570,7 +550,6 @@ public class GamePanel extends JPanel {
 	public void menuScreen() {
 		framei.setSize(frameg.getSize());
 		framei.setLocation(frameg.getLocation());
-		
 		
 		frameg.setVisible(false);
 		framei.setVisible(true);
