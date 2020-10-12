@@ -6,4 +6,4 @@ Game can be completed in about 10 minutes, and it is meant to be speedran. It co
 
 <img src="https://user-images.githubusercontent.com/31777294/95681513-17aa4700-0b95-11eb-95cd-1a6041bc95fa.png" width="400">
 
-Here is a link to the full playthrough (very low quality video): https://youtu.be/lzhgCuTa-GY
+Here is a link to the full playthrough: https://youtu.be/8gGKYo-YgFk
