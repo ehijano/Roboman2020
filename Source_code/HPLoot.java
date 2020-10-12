@@ -9,7 +9,7 @@ public class HPLoot extends Loot{
 	private String imageFolder="img/loot/",soundFolder="sounds/loot/";
 	private int w,h;
 	private ImageIcon lootIcon;
-	Clip clipPickUp;
+	static Clip clipPickUp;
 
 	public HPLoot(GamePanel gp,Player player, int code, int x, int y) {
 		super(gp,player, code, x, y);
@@ -18,10 +18,12 @@ public class HPLoot extends Loot{
 		w = lootIcon.getIconWidth();
 		h = lootIcon.getIconHeight();
 		
-		try {
-			clipPickUp = gpInstance.loadSound(soundFolder+"HP"+Integer.toString(code)+".au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
+		if(clipPickUp==null) {
+			try {
+				clipPickUp = gpInstance.loadSound(soundFolder+"HP"+Integer.toString(code)+".au");
+			} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	}
@@ -38,7 +40,7 @@ public class HPLoot extends Loot{
 	
 	@Override
 	public void pickUp() {
-		player.heal(100-player.health);
+		player.heal(player.maxHealth-player.health);
 		gpInstance.playSound(clipPickUp);
 	}
 	

@@ -4,16 +4,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
@@ -24,9 +16,10 @@ public class Bullet {
 	protected int speed, damage, code;
 	protected boolean enemy;
 	protected double x,y,w,h,dir,tita;
-	Clip clipBat, clipHit, clipAuch, clipBoom;
 	protected String audioFolder="sounds/bullet/";
 	protected ImageIcon imgBOMB, imgbala1;
+	
+	public static Clip clipBat, clipHit, clipAuch, clipBoom;
 	
 	public Bullet(GamePanel gp,double x,double y, int speed, double tita, double dir, int damage, boolean enemy, int code ) {
 		gpInstance = gp;
@@ -45,36 +38,17 @@ public class Bullet {
 			imgBOMB = new ImageIcon(getClass().getResource("img/misc/Minivida.png"));
 		}
 		
-		
-		try {
-			clipBat = loadSound(audioFolder+"mur.au");
-			clipHit = loadSound(audioFolder+"rebound.au");
-			clipAuch = loadSound(audioFolder+"auch.au");
-			clipBoom = loadSound(audioFolder+"boom.au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
+		if (clipHit==null) {
+			try {
+				clipBat = gpInstance.loadSound(audioFolder+"mur.au");
+				clipHit = gpInstance.loadSound(audioFolder+"rebound.au");
+				clipAuch = gpInstance.loadSound(audioFolder+"auch.au");
+				//clipBoom = gpInstance.loadSound(audioFolder+"boom.au");
+			} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+				e.printStackTrace();
+			}
 		}
 		
-	}
-	
-	protected Clip loadSound(String s) throws LineUnavailableException, IOException, UnsupportedAudioFileException {
-		
-		InputStream in = getClass().getResourceAsStream(s);
-		InputStream bufferedIn = new BufferedInputStream(in);
-		AudioInputStream sourceAudioInputStream = AudioSystem.getAudioInputStream(bufferedIn);
-        AudioInputStream targetAudioInputStream=AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED, sourceAudioInputStream);
-        AudioFormat targetFormat = new AudioFormat(new AudioFormat.Encoding("PCM_SIGNED"), 16000, 16, 1, 2, 8000, false);
-        AudioInputStream targetAudioInputStream1 = AudioSystem.getAudioInputStream(targetFormat, targetAudioInputStream);
-        DataLine.Info info = new DataLine.Info(Clip.class, targetAudioInputStream1.getFormat());
-        Clip clipNew = (Clip) AudioSystem.getLine(info);
-        clipNew.addLineListener(event -> {
-            if(LineEvent.Type.STOP.equals(event.getType())) {
-            	clipNew.flush();
-            }
-        });
-        clipNew.open(targetAudioInputStream1);
-        
-		return clipNew;
 	}
 	
 	public boolean isOutOfBounds() {
@@ -85,15 +59,11 @@ public class Bullet {
 		}
 	}
 	
-	protected void playSound(Clip c) {
-		c.setMicrosecondPosition(0);
-		c.start();
-	}
 	
 	public boolean hitsPlayer(int xP,int yP) {
 		 boolean condition = ( (((x >= xP) && (x <= xP + 30) && (y >= yP) && (y <= yP + 50))|| ((x + 10 >= xP) && (x + 10 <= xP + 30) && (y >= yP) && (y <= yP + 50)))   );
 		 if (condition) {
-			 playSound(clipAuch);
+			 gpInstance.playSound(clipAuch);
 			 return true;
 		 }else {
 			 return false;
@@ -123,7 +93,7 @@ public class Bullet {
 		}
 		
 		if ((condicion1) && (condicion2) && (condicion3)) {
-			if (code!= 3) {playSound(clipHit);}
+			if (code!= 3) {gpInstance.playSound(clipHit);}
 			return true;
 		}else {
 			return false;
@@ -140,7 +110,7 @@ public class Bullet {
 		if (((x >= xm) && (x <= xm + 48) && (y >= ym) && (y <= ym + 40))
 				|| ((x + 10 >= xm) && (x + 10 <= xm + 48)
 						&& (y >= ym) && (y <= ym + 40))) {
-			playSound(clipBat);
+			gpInstance.playSound(clipBat);
 			return true;
 		}else {
 			return false;
@@ -225,7 +195,7 @@ public class Bullet {
 			el2 = new Ellipse2D.Double(x - 14 + 10, y - 14 + 10, 28, 28);
 			gInstance.draw(el2);
 			gInstance.fill(el2);
-			playSound(clipBoom);
+			gpInstance.playNewSound(audioFolder+"boom.au");
 			break;
 		case 4:
 			

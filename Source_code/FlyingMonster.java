@@ -1,6 +1,4 @@
-import java.io.IOException;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+
 
 public class FlyingMonster extends Monster {
 
@@ -15,13 +13,7 @@ public class FlyingMonster extends Monster {
 		case "Ship":
 			super.health = 60;
 		}
-				
-		
-		try {
-			clipShoot = gpInstance.loadSound(audioFolder+code+"S.au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		}
+
 		
 	}
 	
@@ -62,7 +54,7 @@ public class FlyingMonster extends Monster {
 	public void shoot() {
 		if ( (shootTime > shootFrequency) ){
 			shootTime = 0;
-			gpInstance.playSound(clipShoot);
+			gpInstance.playNewSound(audioFolder+code+"S.au");
 			gpInstance.monsterShoot(xm + w/2 ,  ym + h/2 , 5 , -1.571*dir , dir , 20 , 3 );
 		} else {
 			shootTime += 1;

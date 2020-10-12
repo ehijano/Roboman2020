@@ -1,6 +1,4 @@
-import java.io.IOException;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+
 
 public class SpamMonster extends Monster{
 
@@ -10,16 +8,8 @@ public class SpamMonster extends Monster{
 		super.health = 30;
 				
 		shootFrequency = 20;
-		
-		
-		try {
-			clipShoot = gpInstance.loadSound(audioFolder+code+"S.au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		}
-		
-	
 	}
+	
 	
 	@Override
 	public void moveMonster(int x, int y) {
@@ -55,7 +45,8 @@ public class SpamMonster extends Monster{
 	public void shoot() {
 		if ( (shootTime > shootFrequency) ){
 			shootTime = 0;
-			gpInstance.playSound(clipShoot);
+			//gpInstance.playSound(mClipShoot.get(code));
+			gpInstance.playNewSound(audioFolder+code+"S.au");
 			gpInstance.monsterShoot(xm + w/2 ,  ym + h/2 , 20 , 0.0 , dir, 10 , 2 );
 		} else {
 			shootTime += 1;

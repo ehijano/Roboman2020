@@ -8,11 +8,13 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Taskbar;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -36,6 +38,25 @@ public class RoboMain {
 		
 		omniFrame = new JFrame("Roboman 2020");
 		omniFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+
+		 //loading an image from a file
+        Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
+        URL imageResource = RoboMain.class.getClassLoader().getResource("img/helmets/0helmet2.png");
+        Image icon = defaultToolkit.getImage(imageResource);
+        Taskbar taskbar = Taskbar.getTaskbar();
+        try {
+            //set icon for mac os (and other systems which do support this method)
+            taskbar.setIconImage(icon);
+        } catch (final UnsupportedOperationException e) {
+            System.out.println("The os does not support: 'taskbar.setIconImage'");
+        } catch (final SecurityException e) {
+            System.out.println("There was a security exception for: 'taskbar.setIconImage'");
+        }
+        //set icon for windows os (and other systems which do support this method)
+        omniFrame.setIconImage(icon);
+		
+		
 		//omniFrame.setUndecorated(true);
 		omniFrame.setSize(dimension);
 		omniFrame.setPreferredSize(dimension);

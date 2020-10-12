@@ -1,15 +1,11 @@
-import java.io.IOException;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 
 public class MoneyLoot extends Loot {
 	
 	private String imageFolder="img/loot/",soundFolder="sounds/loot/";
 	private int value=0,w,h;
-	private ImageIcon lootIcon;
-	Clip clipPickUp;
+	private static ImageIcon lootIcon;
+	//static Clip clipPickUp;
 	
 	public MoneyLoot(GamePanel gp,Player player, int code, int x, int y) {
 		super(gp,player, code,x,y);
@@ -18,17 +14,11 @@ public class MoneyLoot extends Loot {
 		}else if(code == 2) {
 			value = 20;
 		}
-		lootIcon = new ImageIcon(getClass().getResource(imageFolder+"Money"+Integer.toString(code)+".png"));
-		w = lootIcon.getIconWidth();
-		h = lootIcon.getIconHeight();
-		
-		
-		try {
-			clipPickUp = gpInstance.loadSound(soundFolder+"Money"+Integer.toString(code)+".au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
+		if (lootIcon==null) {
+			lootIcon = new ImageIcon(getClass().getResource(imageFolder+"Money"+Integer.toString(code)+".png"));
+			w = lootIcon.getIconWidth();
+			h = lootIcon.getIconHeight();
 		}
-		
 	}
 	
 	@Override
@@ -43,7 +33,7 @@ public class MoneyLoot extends Loot {
 	@Override
 	public void pickUp() {
 		player.money(value);
-		gpInstance.playSound(clipPickUp);
+		gpInstance.playNewSound(soundFolder+"Money"+Integer.toString(code)+".au");
 	}
 	
 	@Override

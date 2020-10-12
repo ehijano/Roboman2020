@@ -1,13 +1,10 @@
 import java.awt.Graphics2D;
-import java.io.IOException;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 
 public class Monster {
 	protected int health = 10, h, w,xm0,ym0;
-	protected Clip clipDeath, clipHurt, clipShoot;
+	//protected Clip clipDeath, clipHurt, clipShoot;
+	//protected static Map<String, Clip> mClipDeath, mClipHurt,mClipShoot;
 	protected boolean alive=true;
 	protected int xm,ym,xi,xf,dir,shootingDir, animationFrequency = 10,animationTime=0,animation=1,tDelay,shootFrequency=150,shootTime=0;
 	protected String imgCode="L1", code, audioFolder = "sounds/monsters/", imageFolder = "img/monsters/";
@@ -38,14 +35,6 @@ public class Monster {
 		
 		w = L1.getIconWidth();
 		h = L1.getIconHeight();
-		
-		// Load Death clip
-		try {
-			clipDeath = gpInstance.loadSound(audioFolder+code+"D.au");
-			clipHurt = gpInstance.loadSound(audioFolder+code+"H.au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		};
 	}
 	
 	public boolean touchesPlayer(int x,int y) {
@@ -89,9 +78,7 @@ public class Monster {
 		if (health<0) {
 			health = 0;
 		}else {
-			if (!clipHurt.isRunning()) {
-				gpInstance.playSound(clipHurt);
-			}
+			gpInstance.playNewSound(audioFolder+code+"H.au");
 		}
 	}
 	
@@ -101,14 +88,13 @@ public class Monster {
 	
 	public void die() {
 		alive = false;
-		gpInstance.playSound(clipDeath);
+		gpInstance.playNewSound(audioFolder+code+"D.au");
 		gpInstance.dropCurrency((int) xm , (int) (ym + h/2) , 1 );
 	}
 	
 	public ImageIcon monsterImage() {
 		return new ImageIcon(getClass().getResource(imageFolder+code+imgCode+".png"));
 	}
-
 
 	public boolean isShot(double X, double Y) {
 		if (((X >= xm) && (X <= xm + w) && (Y >= ym) && (Y <= ym + h))

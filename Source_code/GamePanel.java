@@ -11,7 +11,6 @@ import java.awt.geom.Rectangle2D;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -21,6 +20,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineListener;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -42,7 +42,7 @@ public class GamePanel extends JPanel {
 	private boolean  cstage = true, gameRun = true;
 	private static String  audioFolder = "sounds/events/", stagesFolder = "img/stages/", miscImgFolder="img/misc/";
 	private long startTime, stageTime, stageStartTime;
-	private Clip clipDrip;
+	//private Clip clipDrip;
 	public Player player;
 	private float hScale,vScale;
 	private CardLayout omniLayout;
@@ -59,11 +59,13 @@ public class GamePanel extends JPanel {
 		this.gop = gop;
 		
 		//Audio
+		/*
 		try {
 			clipDrip=loadSound(audioFolder+"goti.au");
 		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
 			e.printStackTrace();
 		}
+		*/
 		
         // Images
 		imgNextStage = new ImageIcon(getClass().getResource(miscImgFolder+"flecha.png"));
@@ -95,32 +97,85 @@ public class GamePanel extends JPanel {
 		repaint();
 	}
 	
+	// static Sounds
 	protected Clip loadSound(String s) throws LineUnavailableException, IOException, UnsupportedAudioFileException {
 		
 		InputStream in = getClass().getResourceAsStream(s);
 		InputStream bufferedIn = new BufferedInputStream(in);
 		AudioInputStream sourceAudioInputStream = AudioSystem.getAudioInputStream(bufferedIn);
-        AudioInputStream targetAudioInputStream=AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED, sourceAudioInputStream);
+        AudioInputStream targetAudioInputStream = AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED, sourceAudioInputStream);
         AudioFormat targetFormat = new AudioFormat(new AudioFormat.Encoding("PCM_SIGNED"), 16000, 16, 1, 2, 8000, false);
         AudioInputStream targetAudioInputStream1 = AudioSystem.getAudioInputStream(targetFormat, targetAudioInputStream);
         DataLine.Info info = new DataLine.Info(Clip.class, targetAudioInputStream1.getFormat());
         Clip clipNew = (Clip) AudioSystem.getLine(info);
-        clipNew.addLineListener(event -> {
-            if(LineEvent.Type.STOP.equals(event.getType())) {
-            	clipNew.flush();
+        
+        clipNew.addLineListener(new LineListener(){
+            public void update(LineEvent e){
+                if(e.getType() == LineEvent.Type.STOP){
+                    ((Clip) e.getLine()).flush();
+                }
             }
         });
+        
         clipNew.open(targetAudioInputStream1);
+        
+        in.close();
+        targetAudioInputStream.close();
+        targetAudioInputStream1.close();
+        sourceAudioInputStream.close();
+        
+		return clipNew;
+	}
+	
+	// temp sounds
+	protected Clip loadTempSound(String s) throws LineUnavailableException, IOException, UnsupportedAudioFileException {
+		
+		InputStream in = getClass().getResourceAsStream(s);
+		InputStream bufferedIn = new BufferedInputStream(in);
+		AudioInputStream sourceAudioInputStream = AudioSystem.getAudioInputStream(bufferedIn);
+        AudioInputStream targetAudioInputStream = AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED, sourceAudioInputStream);
+        AudioFormat targetFormat = new AudioFormat(new AudioFormat.Encoding("PCM_SIGNED"), 16000, 16, 1, 2, 8000, false);
+        AudioInputStream targetAudioInputStream1 = AudioSystem.getAudioInputStream(targetFormat, targetAudioInputStream);
+        DataLine.Info info = new DataLine.Info(Clip.class, targetAudioInputStream1.getFormat());
+        Clip clipNew = (Clip) AudioSystem.getLine(info);
+        
+        clipNew.addLineListener(new LineListener(){
+            public void update(LineEvent e){
+                if(e.getType() == LineEvent.Type.STOP){
+                    ((Clip) e.getLine()).close();
+                }
+            }
+        });
+        
+        clipNew.open(targetAudioInputStream1);
+        
+        in.close();
+        bufferedIn.close();
+        targetAudioInputStream.close();
+        targetAudioInputStream1.close();
+        sourceAudioInputStream.close();
         
 		return clipNew;
 	}
 	
 	public void playSound(Clip c) {
+		/*
 		if(c.isRunning()) {
 	        c.stop();
 		}
+		*/
 	    c.setFramePosition(0);
 	    c.start();
+	}
+	
+	public void playNewSound(String s) {
+		try {
+			Clip c = loadTempSound(s);
+			c.setFramePosition(0);
+		    c.start();
+		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public double getGravity() {
@@ -190,6 +245,7 @@ public class GamePanel extends JPanel {
 	}
 
 	public void changeStage() {
+		
 		stage += 1;
 		stageTime = System.currentTimeMillis();
 		cstage = true;
@@ -572,7 +628,7 @@ public class GamePanel extends JPanel {
 	}
 	
 	public void gameOverScreen() {
-		long elapsed = ((new Date()).getTime() - startTime)/1000;
+		long elapsed = (System.currentTimeMillis() - startTime);
 		
 		gop.receiveScore(player.score,elapsed);
 		
@@ -677,7 +733,7 @@ public class GamePanel extends JPanel {
 					Ellipse2D el = new Ellipse2D.Double(xp, 768 - 9, 6, 6);
 					g2.fill(el);
 					g2.draw(el);
-					playSound(clipDrip);
+					playNewSound(audioFolder+"goti.au");
 					el = new Ellipse2D.Double(xp - 10 + 3, 768 - 11 - 10 + 3,20, 20);
 					g2.draw(el);
 					el = new Ellipse2D.Double(xp - 15 + 3, 768 - 11 - 15 + 3,30, 30);
@@ -881,7 +937,7 @@ public class GamePanel extends JPanel {
 			int posx;
 			int posy;
 			AffineTransform rotation = AffineTransform.getRotateInstance(-player.tita, player.x + 15, player.y + 30);
-			if (player.dir == 1) {
+			if (Player.dir == 1) {
 				posx = player.x;
 				posy = player.y;
 			} else {
@@ -891,7 +947,7 @@ public class GamePanel extends JPanel {
 			rotation.translate(posx, posy + 20);
 			// Light
 			if ((stage == 8) || (stage == 9) || (stage == 10)) {
-				if (player.dir == 1) {
+				if (Player.dir == 1) {
 					g2.drawImage(imgLI.getImage(), rotation, null);
 				} else {
 					g2.drawImage(imgLI2.getImage(), rotation, null);

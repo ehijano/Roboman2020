@@ -2,9 +2,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+
 
 public class SpawningMonster extends Monster{
 	
@@ -21,13 +19,7 @@ public class SpawningMonster extends Monster{
 		hSpawn = auxMonster.h;
 		wSpawn = auxMonster.w;
 		
-		try {
-			clipShoot = gpInstance.loadSound(audioFolder+code+"S.au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		}
 	}
-	
 
 	@Override
 	public void moveMonster(int x, int y) {
@@ -68,7 +60,8 @@ public class SpawningMonster extends Monster{
 	public void shoot() {
 		if ( (shootTime > shootFrequency) ){
 			shootTime = 0;
-			gpInstance.playSound(clipShoot);
+			//gpInstance.playSound(mClipShoot.get(code));
+			gpInstance.playNewSound(audioFolder+code+"S.au");
 			Monster newMonster = new WalkingMonster(gpInstance,"Alien",xm +(dir+1)*(w-wSpawn)/2 ,ym+h-hSpawn,0,1024,dir,0);
 			gpInstance.spawnMonster(newMonster);
 		} else {

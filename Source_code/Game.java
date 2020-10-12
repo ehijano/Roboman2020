@@ -90,6 +90,8 @@ class Game extends Thread {
 			player.setLocation(10,713);
 		}
 		
+		player.noJump();
+		
 		if (stage == 17) {// Final stage
 			gpanel.finalScreen();
 			gpanel.setVisible(false);
@@ -168,8 +170,6 @@ class Game extends Thread {
 				
 				// Did game end?
 				if (!gpanel.checkGameRun()) {
-					//gpanel.resetGame();
-					//menuScreen();
 					stopRun();
 				}
 			}
@@ -213,12 +213,19 @@ class Game extends Thread {
 				
 				player.changeAngle(tita);
 				
+				/*
 				if((!isLeft)&&(!isRight)) {
 					if ((posx - player.x - 15 < 0)) {
 						dir = -1;
 					} else {
 						dir = 1;
 					}
+				}
+				*/
+				if ((posx - player.x - 15 < 0)) {
+					dir = -1;
+				} else {
+					dir = 1;
 				}
 			}
 		}

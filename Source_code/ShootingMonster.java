@@ -1,7 +1,3 @@
-import java.io.IOException;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 public class ShootingMonster extends Monster {
 	private boolean shooting=false;
 	public ShootingMonster(GamePanel gp,String code, int xm, int ym, int xi, int xf, int dir, int tDelay) {
@@ -10,14 +6,10 @@ public class ShootingMonster extends Monster {
 		super.health = 20;
 		
 		shootFrequency = 10;
-		
-		try {
-			clipShoot = gpInstance.loadSound(audioFolder+code+"S.au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		}
+
 	}
 
+	
 	@Override
 	public void moveMonster(int x, int y) {
 		// Direction
@@ -67,7 +59,8 @@ public class ShootingMonster extends Monster {
 	public void shoot() {
 		if ( (shootTime > shootFrequency) && (shooting) ){
 			shootTime = 0;
-			gpInstance.playSound(clipShoot);
+			//gpInstance.playSound(mClipShoot.get(code));
+			gpInstance.playNewSound(audioFolder+code+"S.au");
 			gpInstance.monsterShoot(xm + w/2 ,  ym + h/2 , 20 , 0.0 , shootingDir, 10 , 2 );
 		} else {
 			shootTime += 1;

@@ -2,9 +2,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+
 
 public class ChasingMonster extends Monster {
 
@@ -13,12 +11,6 @@ public class ChasingMonster extends Monster {
 		super(gp,code, xm, ym, xi, xf, dir, tDelay);
 		
 		super.health = 100;
-		
-		try {
-			clipShoot = gpInstance.loadSound(audioFolder+code+"S.au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
-		}
 
 	}
 
@@ -55,9 +47,8 @@ public class ChasingMonster extends Monster {
 	public void shoot() {
 		if ( (shootTime > shootFrequency) ){
 			shootTime = 0;
-			gpInstance.playSound(clipShoot);
-			//Rectangle2D monsterShot = new Rectangle2D.Double(xm + w/2, ym + 96, (double) 10.0 + dir/10.0 , 4);
-			//gpInstance.shootSlowBullet(monsterShot);
+			//gpInstance.playSound(mClipShoot.get(code));
+			gpInstance.playNewSound(audioFolder+code+"S.au");
 			gpInstance.monsterShoot(xm + w/2, ym + 96 , 10 , 0.0 , dir , 20 , 4 );
 		} else {
 			shootTime += 1;

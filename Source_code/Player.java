@@ -3,28 +3,34 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Vector;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 
 public class Player {
 	protected double tita = 0, speedV = 0.0; 
-	protected int currentWeapon = 0, currentHelmet = 0, dir=1,walkingDir = 0, animationTime = 10, animationCount = 0;
-	protected int health=100, shield=0, ammo = 100, score=0, x = 10, y= 713, y0, speedH=2, animationNumber = 1;
+	protected int currentWeapon = 0, currentHelmet = 0;
+	protected static int dir=1;
+	protected int walkingDir = 0;
+	protected int animationTime = 10;
+	protected int animationCount = 0;
+	protected int health, shield=0;
+	protected static int ammo = 100;
+	protected int score=0;
+	protected int x = 10;
+	protected int y= 713;
+	protected int y0;
+	protected int speedH=2;
+	protected int animationNumber = 1;
 	protected long jumpTime=0;
-	
+	protected int maxHealth = 100;
 	protected boolean visible = true,jumping = false,falling = false, isWalkingRight=false, isWalkingLeft=false, clicking = false;
-	protected String miscImgFolder="img/misc/", audioFolder="sounds/events/",lootImgFolder="img/loot/";
+	protected String miscImgFolder="img/misc/";
+	protected static String audioFolder="sounds/events/";
+	protected String lootImgFolder="img/loot/";
 	private ImageIcon imgbalas,imgESC,imgCoin,imgINF;
 	private Weapon weapon;
 	private Vector<Integer> availableWeapons;
@@ -35,6 +41,7 @@ public class Player {
 	
 	public Player(GamePanel gp) {
 		gpInstance = gp;
+		health = maxHealth;
 		// Weapon
 		weapon = new Pistol(this,gpInstance,0);
 		availableWeapons = new Vector<Integer>();
@@ -52,10 +59,12 @@ public class Player {
 			vWeaponImages.add(new ImageIcon(getClass().getResource(lootImgFolder+"Weapon"+Integer.toString(i)+".png")));
 		}
 		
-		try {
-			clipJump = loadSound(audioFolder+"drip.au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
+		if(clipJump==null){
+			try {
+				clipJump = gpInstance.loadSound(audioFolder+"drip.au");
+			} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		vWeapons = new Vector<Weapon>();
@@ -67,6 +76,11 @@ public class Player {
 		vWeapons.add(new MiniGun(this,gp,4));
 		vWeapons.add(new RayGun(this,gp,5));
 
+	}
+	
+	public void noJump() {
+		jumping=false;
+		falling=false;
 	}
 	
 	public void setLocation(int newX,int newY) {
@@ -90,7 +104,7 @@ public class Player {
 			int yp = plat[1];
 			int standingOn = plat[4];
 			if ((x + 30 > xp -1) && (x < xp + plat[2]+1)) {
-				if( (speedV < 0) && (y + 50 > yp - Math.abs(speedV) ) && (y + 50 < yp + Math.abs(speedV) )) {
+				if( (speedV < 0) && (y + 50 > yp -2* Math.abs(speedV) ) && (y + 50 < yp +2* Math.abs(speedV) )) {
 					// Landed on platform
 					standingOn = 1;
 					jumpTime = System.currentTimeMillis();
@@ -197,7 +211,9 @@ public class Player {
 			jumping= true;
 			jumpTime = System.currentTimeMillis();
 			y0 = y;
-			gpInstance.playSound(clipJump);
+			
+			//gpInstance.playSound(clipJump);
+			gpInstance.playNewSound(audioFolder+"drip.au");
 		}
 	}
 	
@@ -265,8 +281,7 @@ public class Player {
 	public void setVisible(boolean vis) {
 		visible = vis;
 	}
-
-
+	
 
 	public void drawHUD(Graphics2D g2, int x0, int y0) {
 		// Background
@@ -338,10 +353,10 @@ public class Player {
 		}
 	}
 	
-	private class Weapon{
+	private static class Weapon{
 		
 		protected int code;
-		protected Clip clipShot,clipEmpty;
+		protected static Clip clipEmpty;
 		Player player;
 		GamePanel gpInstance;
 		
@@ -349,15 +364,17 @@ public class Player {
 			gpInstance = gp;
 			this.player = player;
 			this.code = code;
-			try {
-				clipShot = loadSound(audioFolder+Integer.toString(code)+"shot1.au");
-				clipEmpty = loadSound(audioFolder+"click2.au");
-			} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-				e.printStackTrace();
+			
+			if(clipEmpty == null) {
+				try {
+					clipEmpty = gpInstance.loadSound(audioFolder+"click2.au");
+				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		public void shoot() {
-			playSound(clipShot);
+			gpInstance.playNewSound(audioFolder+Integer.toString(code)+"shot1.au");
 			player.ammo(1);
 			gpInstance.addBullet(player.x , player.y, dir, player.tita, 0, power());
 		}
@@ -367,13 +384,9 @@ public class Player {
 		}
 		
 		public void empty() {
-			playSound(clipEmpty);
+			gpInstance.playSound(clipEmpty);
 		}
 		
-		protected void playSound(Clip c) {
-			c.setMicrosecondPosition(0);
-			c.start();
-		}
 		
 		private ImageIcon getImage() {
 			return new ImageIcon(getClass().getResource("img/weapons/"+ Integer.toString(code) +"gun"+Integer.toString(dir+1)+ ".png"));
@@ -392,10 +405,22 @@ public class Player {
 		}
 	}
 	
-	private class Pistol extends Weapon{
+	private static class Pistol extends Weapon{
 		private long cdTimer,cdThreshold;
+		//private static Clip clipShot;
 		public Pistol(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
+			
+			/*
+			if(clipShot==null){
+				try {
+					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
+				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				}
+			}
+			*/
+			
 			cdThreshold = 500;
 			cdTimer = System.currentTimeMillis()-cdThreshold; //Starts able to shoot
 		}
@@ -405,8 +430,8 @@ public class Player {
 			long currentTime =  System.currentTimeMillis();
 			if (currentTime-cdTimer >= cdThreshold) {
 				cdTimer = System.currentTimeMillis();
-				playSound(clipShot);
 				gpInstance.addBullet(player.x , player.y, dir, player.tita, 0, power());
+				gpInstance.playNewSound(audioFolder+Integer.toString(code)+"shot1.au");
 			}
 		}
 		
@@ -417,9 +442,20 @@ public class Player {
 	}
 	
 	private class Cannon extends Weapon{
+		//private Clip clipShot;
 		public Cannon(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
+			/*
+			if(clipShot==null){
+				try {
+					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
+				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				}
+			}
+			*/
 		}
+		
 		
 		@Override
 		public int power() {
@@ -427,10 +463,21 @@ public class Player {
 		}
 	}
 	
-	private class AK47 extends Weapon{
+	private static class AK47 extends Weapon{
+		//private static Clip clipShot;
 		public AK47(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
+			/*
+			if(clipShot==null){
+				try {
+					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
+				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				}
+			}
+			*/
 		}
+	
 		
 		@Override
 		public int power() {
@@ -438,10 +485,21 @@ public class Player {
 		}
 	}
 	
-	private class ShotGun extends Weapon{
+	private static class ShotGun extends Weapon{
 		private long cdTimer, cdThreshold;
+		//private static Clip clipShot;
 		public ShotGun(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
+			/*
+			if(clipShot==null){
+				try {
+					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
+				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				}
+			}
+			*/
+			
 			cdThreshold = 1000;
 			cdTimer = System.currentTimeMillis()-cdThreshold; //Starts able to shoot
 		}
@@ -451,7 +509,9 @@ public class Player {
 			long currentTime =  System.currentTimeMillis();
 			if ((currentTime-cdTimer >= cdThreshold)) {
 				cdTimer = System.currentTimeMillis();
-				playSound(clipShot);
+
+				gpInstance.playNewSound(audioFolder+Integer.toString(code)+"shot1.au");
+				
 				gpInstance.addBullet(player.x, player.y, dir, player.tita+0.157,0, power());
 				gpInstance.addBullet(player.x, player.y, dir, player.tita, 0, power());
 				gpInstance.addBullet(player.x, player.y, dir, player.tita-0.157,0, power());
@@ -466,18 +526,22 @@ public class Player {
 		}
 	}
 	
-	private class MiniGun extends Weapon{
+	private static class MiniGun extends Weapon{
 		private double heat=0.0,overheat=0.0, maxHeat=35;
 		private long delayTimer=500,wheelTimer=0;
 		private boolean shooting=false;
-		Clip clipPS, clipOH;
+		private static Clip clipPS, clipOH;
 		public MiniGun(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
-			try {
-				clipPS = loadSound(audioFolder+"p2.au");
-				clipOH = loadSound(audioFolder+"pss.au");
-			} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-				e.printStackTrace();
+			
+			if(clipPS==null){
+				try {
+					//clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
+					clipPS = gpInstance.loadSound(audioFolder+"p2.au");
+					clipOH = gpInstance.loadSound(audioFolder+"pss.au");
+				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
@@ -515,7 +579,8 @@ public class Player {
 						heat += 1;
 						overheat = heat;
 						shooting = true;
-						shoot();
+						super.shoot();
+						gpInstance.playNewSound(audioFolder+Integer.toString(code)+"shot1.au");
 						player.ammo(1);
 					} else {
 						delayTimer += 1;
@@ -562,10 +627,21 @@ public class Player {
 	}
 	
 	
-	private class RayGun extends Weapon{
+	private static class RayGun extends Weapon{
 		private long cdTimer,cdThreshold;
+		//private static Clip clipShot;
 		public RayGun(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
+			/*
+			if(clipShot==null){
+				try {
+					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
+				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				}
+			}
+			*/
+			
 			cdThreshold = 300;
 			cdTimer = System.currentTimeMillis()-cdThreshold; //Starts able to shoot
 		}
@@ -575,7 +651,7 @@ public class Player {
 			long currentTime =  System.currentTimeMillis();
 			if (currentTime-cdTimer >= cdThreshold) {
 				cdTimer = System.currentTimeMillis();
-				playSound(clipShot);
+				gpInstance.playNewSound(audioFolder+Integer.toString(code)+"shot1.au");
 				player.ammo(1);
 				gpInstance.addBullet(player.x , player.y, dir, player.tita, 1, power());
 			}
@@ -586,25 +662,5 @@ public class Player {
 			return 10;
 		}
 	}
-	
-	
-	private Clip loadSound(String s) throws LineUnavailableException, IOException, UnsupportedAudioFileException {
-		
-		InputStream in = getClass().getResourceAsStream(s);
-		InputStream bufferedIn = new BufferedInputStream(in);
-		AudioInputStream sourceAudioInputStream = AudioSystem.getAudioInputStream(bufferedIn);
-        AudioInputStream targetAudioInputStream=AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED, sourceAudioInputStream);
-        AudioFormat targetFormat = new AudioFormat(new AudioFormat.Encoding("PCM_SIGNED"), 16000, 16, 1, 2, 8000, false);
-        AudioInputStream targetAudioInputStream1 = AudioSystem.getAudioInputStream(targetFormat, targetAudioInputStream);
-        DataLine.Info info = new DataLine.Info(Clip.class, targetAudioInputStream1.getFormat());
-        Clip clipNew = (Clip) AudioSystem.getLine(info);
-        clipNew.addLineListener(event -> {
-            if(LineEvent.Type.STOP.equals(event.getType())) {
-            	clipNew.flush();
-            }
-        });
-        clipNew.open(targetAudioInputStream1);
-        
-		return clipNew;
-	}
+
 }

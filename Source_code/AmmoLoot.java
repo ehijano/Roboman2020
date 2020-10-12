@@ -10,7 +10,7 @@ public class AmmoLoot extends Loot{
 	private String imageFolder="img/loot/",soundFolder="sounds/loot/";
 	private int value=0,w,h;
 	private ImageIcon lootIcon;
-	Clip clipPickUp;
+	private static Clip clipPickUp;
 	
 	public AmmoLoot(GamePanel gp,Player player, int code, int x, int y) {
 		super(gp,player, code, x, y);
@@ -20,10 +20,12 @@ public class AmmoLoot extends Loot{
 		w = lootIcon.getIconWidth();
 		h = lootIcon.getIconHeight();
 		
-		try {
-			clipPickUp = gpInstance.loadSound(soundFolder+"Ammo"+Integer.toString(code)+".au");
-		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			e.printStackTrace();
+		if (clipPickUp==null) {
+			try {
+				clipPickUp = gpInstance.loadSound(soundFolder+"Ammo"+Integer.toString(code)+".au");
+			} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+				e.printStackTrace();
+			}
 		}
 		
 
