@@ -1,6 +1,6 @@
 # Roboman2020
 
-.jar file can be executed on its own. No need for any other file.
+.jar file can be executed on its own. No need for any other file. (You might need [Java SDK](https://www.oracle.com/java/technologies/javase-jdk15-downloads.html))
 
 Game can be completed in about 10 minutes, and it is meant to be speedran. It contains a competitive online leaderboard with players' best times.
 
