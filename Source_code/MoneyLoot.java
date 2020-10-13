@@ -4,7 +4,7 @@ public class MoneyLoot extends Loot {
 	
 	private String imageFolder="img/loot/",soundFolder="sounds/loot/";
 	private int value=0,w,h;
-	private static ImageIcon lootIcon;
+	private ImageIcon lootIcon;
 	//static Clip clipPickUp;
 	
 	public MoneyLoot(GamePanel gp,Player player, int code, int x, int y) {
@@ -14,11 +14,9 @@ public class MoneyLoot extends Loot {
 		}else if(code == 2) {
 			value = 20;
 		}
-		if (lootIcon==null) {
-			lootIcon = new ImageIcon(getClass().getResource(imageFolder+"Money"+Integer.toString(code)+".png"));
-			w = lootIcon.getIconWidth();
-			h = lootIcon.getIconHeight();
-		}
+		lootIcon = new ImageIcon(getClass().getResource(imageFolder+"Money"+Integer.toString(code)+".png"));
+		w = lootIcon.getIconWidth();
+		h = lootIcon.getIconHeight();
 	}
 	
 	@Override

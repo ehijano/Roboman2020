@@ -47,6 +47,9 @@ public class Player {
 		availableWeapons = new Vector<Integer>();
 		availableWeapons.add(0);
 		
+		ammo = 100;
+		score = 0;
+		
 		 // HUD Images
 		imgINF = new ImageIcon(getClass().getResource(miscImgFolder+"inf.png"));
 		imgbalas = new ImageIcon(getClass().getResource(miscImgFolder+"balas.png"));
@@ -88,45 +91,36 @@ public class Player {
 		y= newY;
 	}
 	
+	public void interactPlatforms(Vector<Platform> vP) {
+		for (int b = 0; b < vP.size(); b++) {
+			Platform plat = vP.elementAt(b);
+			if ((speedV < 0) && (plat.belowPlayer(x,y)) && ( plat.playerYDistance(y + 50) < 2*Math.abs(speedV) )) {
+				plat.setStanding(true);
+				jumpTime = System.currentTimeMillis();
+				speedV = 0;
+				jumping = false;
+				falling = false;
+				y = plat.yp - 50 + 2;
+				y0 = plat.yp - 50 + 2;
+			} else if (jumping) {
+				plat.playerStanding = false;
+			}
+			if ((plat.playerStanding) && (!plat.belowPlayer(x,y))) {
+				plat.setStanding(false);
+				jumpTime = System.currentTimeMillis();
+				y0 = y;
+				jumping = false;
+				falling = true;
+			}
+		}
+	}
+	
 	public void update() {
+		long currentTime = System.currentTimeMillis();
 		
 		if (weapon.automatic()) {
 			weapon.automaticShot(clicking);
 		}
-		
-		long currentTime = System.currentTimeMillis();
-		
-		Vector<int[]> vPlatforms2 = new Vector<int[]>();
-		vPlatforms2 = gpInstance.getPlatforms();
-		for (int b = 0; b < vPlatforms2.size(); b++) {
-			int[] plat = (int[]) vPlatforms2.elementAt(b);
-			int xp = plat[0];
-			int yp = plat[1];
-			int standingOn = plat[4];
-			if ((x + 30 > xp -1) && (x < xp + plat[2]+1)) {
-				if( (speedV < 0) && (y + 50 > yp -2* Math.abs(speedV) ) && (y + 50 < yp +2* Math.abs(speedV) )) {
-					// Landed on platform
-					standingOn = 1;
-					jumpTime = System.currentTimeMillis();
-					speedV = 0;
-					jumping = false;
-					falling = false;
-					y = yp - 50 + 2;
-					y0 = yp - 50 + 2;
-				}
-			} else if (plat[4] == 1) {
-				// Fall from platform
-				jumpTime = System.currentTimeMillis();
-				y0 = y;
-				standingOn = 2;
-				jumping = false;
-				falling = true;
-			}
-			plat[4] = standingOn;
-			vPlatforms2.remove(b);
-			vPlatforms2.insertElementAt(plat, b);
-		}
-		gpInstance.updatePlatforms(vPlatforms2);
 		
 		// Movement 
 		if (((isWalkingRight)||(isWalkingLeft)) && (!jumping) && (!falling)) {
@@ -135,17 +129,6 @@ public class Player {
 			animateWalking();
 			
 		} else if (jumping) {// Normal jump
-			Vector<int[]> vPlatforms3 = new Vector<int[]>();
-			vPlatforms3 = gpInstance.getPlatforms();
-			for (int b = 0; b < vPlatforms3.size(); b++) {
-				int[] plat = (int[]) vPlatforms3.elementAt(b);
-				plat[4] = 2;
-				vPlatforms3.remove(b);
-				vPlatforms3.insertElementAt(plat, b);
-			}
-			gpInstance.updatePlatforms(vPlatforms3);
-			
-			
 			double gravity = gpInstance.getGravity();
 			double drag = gpInstance.getDrag();
 			long t = (currentTime - jumpTime)/10;
@@ -411,16 +394,6 @@ public class Player {
 		public Pistol(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
 			
-			/*
-			if(clipShot==null){
-				try {
-					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
-				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-					e.printStackTrace();
-				}
-			}
-			*/
-			
 			cdThreshold = 500;
 			cdTimer = System.currentTimeMillis()-cdThreshold; //Starts able to shoot
 		}
@@ -445,15 +418,6 @@ public class Player {
 		//private Clip clipShot;
 		public Cannon(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
-			/*
-			if(clipShot==null){
-				try {
-					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
-				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-					e.printStackTrace();
-				}
-			}
-			*/
 		}
 		
 		
@@ -467,15 +431,6 @@ public class Player {
 		//private static Clip clipShot;
 		public AK47(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
-			/*
-			if(clipShot==null){
-				try {
-					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
-				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-					e.printStackTrace();
-				}
-			}
-			*/
 		}
 	
 		
@@ -490,15 +445,6 @@ public class Player {
 		//private static Clip clipShot;
 		public ShotGun(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
-			/*
-			if(clipShot==null){
-				try {
-					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
-				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-					e.printStackTrace();
-				}
-			}
-			*/
 			
 			cdThreshold = 1000;
 			cdTimer = System.currentTimeMillis()-cdThreshold; //Starts able to shoot
@@ -632,15 +578,6 @@ public class Player {
 		//private static Clip clipShot;
 		public RayGun(Player player, GamePanel gp,int code) {
 			super(player,gp,code);
-			/*
-			if(clipShot==null){
-				try {
-					clipShot = gpInstance.loadSound(audioFolder+Integer.toString(code)+"shot1.au");
-				} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-					e.printStackTrace();
-				}
-			}
-			*/
 			
 			cdThreshold = 300;
 			cdTimer = System.currentTimeMillis()-cdThreshold; //Starts able to shoot

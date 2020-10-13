@@ -28,6 +28,7 @@ class Game extends Thread {
 	private volatile boolean exit = false;
 	private Clip clipTO;
 	private Player player;
+	private Vector<Platform> vPlatforms;
 	private float hScale,vScale;
 	JFrame omniFrame;
 	private long timePerFrame,frameTime;
@@ -114,10 +115,13 @@ class Game extends Thread {
 				frameTime = System.currentTimeMillis();
 				
 				player = gpanel.getPlayer();
+				vPlatforms = gpanel.getPlatform();
 				
 				listenerMouseMotion.settita();
 				
 				player.setState(isRight,isLeft,dir,walkingDir,clicking);
+				
+				player.interactPlatforms(vPlatforms);
 				
 				player.update();
 	
@@ -137,7 +141,7 @@ class Game extends Thread {
 	
 				} else {
 					
-					int stage = gpanel.getstage();
+					int stage = GamePanel.stage;
 					
 					if ((player.x > 1024 - 30) && (gpanel.isStageClear())) {// Stage ends
 						finishStage(stage);
@@ -169,7 +173,7 @@ class Game extends Thread {
 				}
 				
 				// Did game end?
-				if (!gpanel.checkGameRun()) {
+				if (!gpanel.getgameRun()) {
 					stopRun();
 				}
 			}

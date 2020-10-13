@@ -100,6 +100,34 @@ public class Bullet {
 		}
 	}
 	
+	public boolean hitsPlat(Platform plat) {
+		double x2 = x + speed * Math.cos(tita) * dir;
+		double y2 = y - speed * Math.sin(tita) * dir;
+		
+		double cutx = (y - plat.yp) / (Math.tan(tita)) + x;
+		double cuty = plat.yp;
+		
+		boolean c1 = false, c2 = false, c3 = false;
+		
+		if ((cutx >= plat.xp) && (cutx <= plat.xp + plat.wp)) {
+			c1 = true;
+		}
+		if ((cuty > plat.yp - 3) && (cuty < plat.yp + plat.hp + 3)) {
+			c2 = true;
+		}
+		if (Math.sqrt(Math.pow((cutx - x), 2)+ Math.pow((cuty - y), 2)) < Math.sqrt(Math.pow((x2 - x), 2)+ Math.pow((y2 - y), 2))) {
+			c3 = true;
+		}
+		
+		if ((c1) && (c2) && (c3)) {
+			if (code!= 3) {gpInstance.playNewSound(audioFolder+"rebound.au");}
+			return true;
+		}else {
+			return false;
+		}
+		
+	}
+	
 	public boolean hitsMonster(Monster monster) {
 		return monster.isShot(x,y);
 	}

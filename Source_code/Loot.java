@@ -6,6 +6,7 @@ public class Loot {
 	protected int code,x,y, y0;
 	protected long spawnTime;
 	protected GamePanel gpInstance;
+	public double xA,yA,xB,yB,intersection;
 	
 	public Loot(GamePanel gp,Player player, int code, int x, int y) {
 		gpInstance = gp;
@@ -19,26 +20,19 @@ public class Loot {
 	}
 	
 	public boolean touchesPlayer(int xP, int yP) {
-		boolean corner1 = false, corner2 = false, corner3 = false, corner4 = false;
-		if ((xP > x) && (xP < x + w()) && (yP < y + h()) && (yP > y)) {
-			corner1 = true;
-		} else if ((xP + 30 > x) && (xP + 30 < x + w()) && (yP < y + h())&& (yP > y)) {
-			corner2 = true;
-		} else if ((xP + 30 > x) && (xP + 30 < x + w())&& (yP + 50 < y + h()) && (yP + 50 > y)) {
-			corner3 = true;
-		} else if ((xP > x) && (xP < x + w()) && (yP + 50 < y + h())&& (yP + 50 > y)) {
-			corner4 = true;
+		xA = Math.max(x,xP); 
+		yA = Math.max(y,yP); 
+		
+		xB = Math.min(x+w(),xP+30); 
+		yB = Math.min(y+h(),yP+50);
+		
+		intersection = Math.max(0.0, xB-xA)*Math.max(0.0 ,yB-yA);
+		
+		if (intersection>0) {
+			return true;
+		} else {
+			return false;
 		}
-		if ((x > xP) && (x < xP + 30) && (y < yP + 50) && (y > yP)) {
-			corner1 = true;
-		} else if ((x + w() > xP) && (x + w() < xP + 30) && (y < yP + 50)&& (y > yP)) {
-			corner2 = true;
-		} else if ((x + w() > xP) && (x + w() < xP + 30)&& (y + h() < yP + 50) && (y + h() > yP)) {
-			corner3 = true;
-		} else if ((x > xP) && (x < xP + 30) && (y + h() < yP + 50) && (y + h() > yP)) {
-			corner4 = true;
-		}
-		return ((corner1) || (corner2) || (corner3) || (corner4));
 	}
 	
 	public int h() {

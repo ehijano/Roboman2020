@@ -69,7 +69,6 @@ public class GameOverPanel extends JPanel{
 		g2.drawImage(imgover.getImage(), (int) 0, (int) 0, null);
 		g2.setFont(new Font("Arial", Font.PLAIN, 50));
 		g2.setPaint(Color.red);
-		System.out.println(elapsed);
 		g2.drawString("Time wasted: "+ formatTime(elapsed), 500, 500);
 		g2.setFont(new Font("Arial", Font.PLAIN, 20));
 		g2.drawString("(You could have been working...)", 500, 550);

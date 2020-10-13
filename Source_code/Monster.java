@@ -10,6 +10,7 @@ public class Monster {
 	protected String imgCode="L1", code, audioFolder = "sounds/monsters/", imageFolder = "img/monsters/";
 	protected boolean shooting = false;
 	protected GamePanel gpInstance;
+	public double xA,yA,xB,yB,intersection;
 
 	public Monster(GamePanel gp,String code, int xm, int ym, int xi, int xf, int dir, int tDelay) {
 		// Game Panel Instance
@@ -38,26 +39,19 @@ public class Monster {
 	}
 	
 	public boolean touchesPlayer(int x,int y) {
-		boolean corner1 = false, corner2 = false, corner3 = false, corner4 = false;
-		if ((x > xm) && (x < xm + w) && (y < ym + h) && (y > ym)) {
-			corner1 = true;
-		} else if ((x + 30 > xm) && (x + 30 < xm + w) && (y < ym + h)&& (y > ym)) {
-			corner2 = true;
-		} else if ((x + 30 > xm) && (x + 30 < xm + w)&& (y + 50 < ym + h) && (y + 50 > ym)) {
-			corner3 = true;
-		} else if ((x > xm) && (x < xm + w) && (y + 50 < ym + h)&& (y + 50 > ym)) {
-			corner4 = true;
+		xA = Math.max(xm,x); 
+		yA = Math.max(ym,y); 
+		
+		xB = Math.min(xm+w,x+30); 
+		yB = Math.min(ym+h,y+50);
+		
+		intersection = Math.max(0.0, xB-xA)*Math.max(0.0 ,yB-yA);
+		
+		if (intersection>0) {
+			return true;
+		} else {
+			return false;
 		}
-		if ((xm > x) && (xm < x + 30) && (ym < y + 50) && (ym > y)) {
-			corner1 = true;
-		} else if ((xm + w > x) && (xm + w < x + 30) && (ym < y + 50)&& (ym > y)) {
-			corner2 = true;
-		} else if ((xm + w > x) && (xm + w < x + 30)&& (ym + h < y + 50) && (ym + h > y)) {
-			corner3 = true;
-		} else if ((xm > x) && (xm < x + 30) && (ym + h < y + 50) && (ym + h > y)) {
-			corner4 = true;
-		}
-		return ((corner1) || (corner2) || (corner3) || (corner4));
 	}
 	
 
