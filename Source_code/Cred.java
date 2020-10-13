@@ -69,9 +69,9 @@ public class Cred extends Thread {
 		try { 
 			Properties props = getConnectionData();
 			
-			byte[] salt = new String("12345678").getBytes();
+			byte[] salt = new String("YOURSALTNUMBER").getBytes();
 			int iterationCount = 40000;
-			String keypassword = "Whatisthis";
+			String keypassword = "YOURKEYPASSWORD";
 			int keyLength = 128;
 	        SecretKeySpec key = createSecretKey(keypassword.toCharArray(), salt, iterationCount, keyLength);
 	        
