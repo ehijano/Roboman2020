@@ -12,7 +12,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -41,26 +40,24 @@ public class GamePanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static int stageINI = 0; //Cheat here
-	private static ImageIcon imgLI, imgLI2;
 	public static int stage;
 	private Vector<int[]> bats;
-	private Vector<Platform> vPlatform;
+	public static Vector<Platform> vPlatform;
 	private Vector<Monster> vMonsters;
 	private Vector<Loot> vLoot;
 	private Vector<Bullet> vBulletShots;
 	private boolean  cstage = true;
-	boolean gameRun = true;
+	public static boolean gameRun = true;
 	public static String  audioFolder = "sounds/events/";
 	public static String miscImgFolder="img/misc/";
 	private long startTime, stageTime, stageStartTime;
-	public Player player;
+	public static Player player;
 	private float hScale,vScale;
 	private CardLayout omniLayout;
 	private JPanel omniPanel;
 	private JFrame omniFrame;
 	private VictoryPanel vp;
 	private GameOverPanel gop;
-	public Vector<Stage> vStage;
 	public static Stage currentStage;
 	
 	public GamePanel(CardLayout omniLayout, JPanel omniPanel, JFrame omniFrame, VictoryPanel vp, GameOverPanel gop) {
@@ -70,13 +67,8 @@ public class GamePanel extends JPanel {
 		this.vp = vp;
 		this.gop = gop;
 
-        // Images
-		imgLI = new ImageIcon(getClass().getResource(miscImgFolder+"light1.png"));
-		imgLI2 = new ImageIcon(getClass().getResource(miscImgFolder+"light2.png"));
-
 		// Starting variables
 		stage = stageINI;
-		vStage = new Vector<Stage>();
 		
 		// Player
 		player = new Player(this);
@@ -91,10 +83,6 @@ public class GamePanel extends JPanel {
 		bats = new Vector<int[]>();
 
 		repaint();
-	}
-	
-	public boolean getgameRun() {
-		return gameRun;
 	}
 	
 	public void setGameRun(boolean b) {
@@ -131,7 +119,7 @@ public class GamePanel extends JPanel {
 		return clipNew;
 	}
 	
-	// temp sounds
+	// Temporary sounds
 	protected Clip loadTempSound(String s) throws LineUnavailableException, IOException, UnsupportedAudioFileException {
 		
 		InputStream in = getClass().getResourceAsStream(s);
@@ -163,11 +151,6 @@ public class GamePanel extends JPanel {
 	}
 	
 	public void playSound(Clip c) {
-		/*
-		if(c.isRunning()) {
-	        c.stop();
-		}
-		*/
 	    c.setFramePosition(0);
 	    c.start();
 	}
@@ -234,10 +217,6 @@ public class GamePanel extends JPanel {
 		cstage = true;
 	}
 	
-	public Vector<Platform> getPlatform(){
-		return vPlatform;
-	}
-	
 	public String formatTime(long t) {
 		long elapsed = (t - startTime)/1000;
 		int seconds = (int) (elapsed%60);
@@ -249,10 +228,6 @@ public class GamePanel extends JPanel {
 		if (minutes < 10) {zeroM="0";}else {zeroM="";}
 		
 		return zeroM+Integer.toString(minutes)+":"+zeroS+Integer.toString(seconds);
-	}
-	
-	public Player getPlayer() {
-		return player;
 	}
 
 	public void addBullet(int x, int y, int dir, double tita, int code, int power) {
@@ -271,9 +246,11 @@ public class GamePanel extends JPanel {
 	public void monsterShoot(double xS, double yS, int speed, double tita, double dir, int damage, int code) {
 		vBulletShots.add(new Bullet(this, (double) (xS), (double) (yS) , speed, tita, dir, damage , true, code));
 	}
+	
 	public void dropCurrency(int x, int y, int code) {
 		vLoot.add(new MoneyLoot(this,player,code,x,y) );
 	}
+	
 	public void spawnMonster(Monster monster) {
 		vMonsters.add(monster);
 	}
@@ -284,31 +261,15 @@ public class GamePanel extends JPanel {
 			stageStartTime = System.currentTimeMillis();
 			clearArrays();
 			cstage = false;
-			vStage.clear();
-			
-			switch(stage){
-			case 0:vStage.add( new Stage0(this,vPlatform,vMonsters,vLoot, player));break;
-			case 1:vStage.add( new Stage1(this,vPlatform,vMonsters,vLoot, player));break;
-			case 2:vStage.add( new Stage2(this,vPlatform,vMonsters,vLoot, player));break;
-			case 3:vStage.add( new Stage3(this,vPlatform,vMonsters,vLoot, player));break;
-			case 4:vStage.add( new Stage4(this,vPlatform,vMonsters,vLoot, player));break;
-			case 5:vStage.add( new Stage5(this,vPlatform,vMonsters,vLoot, player));break;
-			case 6:vStage.add( new Stage6(this,vPlatform,vMonsters,vLoot, player));break;
-			case 7:vStage.add( new Stage7(this,vPlatform,vMonsters,vLoot, player));break;
-			case 8:vStage.add( new Stage8(this,vPlatform,vMonsters,vLoot, player));break;
-			case 9:vStage.add( new Stage9(this,vPlatform,vMonsters,vLoot, player));break;
-			case 10:vStage.add( new Stage10(this,vPlatform,vMonsters,vLoot, player));break;
-			case 11:vStage.add( new Stage11(this,vPlatform,vMonsters,vLoot, player));break;
-			case 12:vStage.add( new Stage12(this,vPlatform,vMonsters,vLoot, player));break;
-			case 13:vStage.add( new Stage13(this,vPlatform,vMonsters,vLoot, player));break;
-			case 14:vStage.add( new Stage14(this,vPlatform,vMonsters,vLoot, player));break;
-			case 15:vStage.add( new Stage15(this,vPlatform,vMonsters,vLoot, player));break;
-			case 16:vStage.add( new Stage16(this,vPlatform,vMonsters,vLoot, player));break;
-			case 17:vStage.add( new Stage17(this,vPlatform,vMonsters,vLoot, player));
-			//break;
-			//case 20:vStage.add( new StageRandom(this,vPlatform,vMonsters,vLoot, player,0.9));
 
+			try {
+				String className = "stages.Stage"+Integer.toString(stage);
+				Class<?> classDefinition = Class.forName(className);
+				currentStage = (Stage) classDefinition.getDeclaredConstructor(GamePanel.class,Vector.class,Vector.class,Vector.class,Player.class ).newInstance(this,vPlatform,vMonsters,vLoot, player);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+			
 		}
 	}
 	
@@ -342,14 +303,6 @@ public class GamePanel extends JPanel {
 		omniLayout.show(omniPanel,"GAMEOVER");
 		gop.requestFocus();
 	}
-
-	public boolean isStageClear() {
-		if (vMonsters.size()==0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
 	
 	private void drawPlatforms(Graphics2D g2) {
 		for (int b = 0; b < vPlatform.size(); b++) {
@@ -375,8 +328,6 @@ public class GamePanel extends JPanel {
 	
 	public void paintComponent(Graphics g) {
 		chooseStage();
-		
-		currentStage = vStage.elementAt(0);
 		
 		Graphics2D g2 = (Graphics2D) g;
 		
@@ -411,9 +362,7 @@ public class GamePanel extends JPanel {
 				loot.update();
 			}
 		}
-
 		
-
 		// Bullets
 		int bulletIndex=0;
 		while(bulletIndex<vBulletShots.size()) {
@@ -512,14 +461,6 @@ public class GamePanel extends JPanel {
 				posy = player.y;
 			}
 			rotation.translate(posx, posy + 20);
-			// Light
-			if ((stage == 8) || (stage == 9) || (stage == 10)) {
-				if (Player.dir == 1) {
-					g2.drawImage(imgLI.getImage(), rotation, null);
-				} else {
-					g2.drawImage(imgLI2.getImage(), rotation, null);
-				}
-			}
 			g2.drawImage(player.getWeaponImage().getImage(), rotation, null);
 		}
 
@@ -541,8 +482,6 @@ public class GamePanel extends JPanel {
 		}
 		
 		currentStage.drawExtras(g2);
-		
-		
 	}
 
 }
