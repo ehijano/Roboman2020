@@ -6,7 +6,7 @@ import player.Player;
 
 public class MoneyLoot extends Loot {
 	
-	private String imageFolder="img/loot/",soundFolder="sounds/loot/";
+	private String soundFolder="sounds/loot/";
 	private int value=0,w,h;
 	private ImageIcon lootIcon;
 	//static Clip clipPickUp;
