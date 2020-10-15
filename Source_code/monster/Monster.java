@@ -23,7 +23,7 @@ public class Monster {
 	public int tDelay;
 	protected int shootFrequency=150;
 	protected int shootTime=0;
-	protected String imgCode="L1", code, audioFolder = "sounds/monsters/", imageFolder = "img/monsters/";
+	protected String imgCode="L1", code, audioFolder = "sounds/monsters/", imageFolder = "img/";
 	protected boolean shooting = false;
 	protected GamePanel gpInstance;
 	public double xA,yA,xB,yB,intersection;
