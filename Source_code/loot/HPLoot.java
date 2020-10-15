@@ -10,7 +10,7 @@ import player.Player;
 
 public class HPLoot extends Loot{
 	
-	private String imageFolder="img/loot/",soundFolder="sounds/loot/";
+	private String soundFolder="sounds/loot/";
 	private int w,h;
 	private ImageIcon lootIcon;
 	static Clip clipPickUp;
