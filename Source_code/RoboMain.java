@@ -20,6 +20,14 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import panels.CreditsPanel;
+import panels.GameOverPanel;
+import panels.GamePanel;
+import panels.MenuPanel;
+import panels.VictoryPanel;
+import threads.Cred;
+import threads.Game;
+
 public class RoboMain {
 	public static MenuPanel menuPanel;
 	public static GamePanel gamePanel;
@@ -42,7 +50,7 @@ public class RoboMain {
 
 		 //loading an image from a file
         Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
-        URL imageResource = RoboMain.class.getClassLoader().getResource("img/helmets/0helmet2.png");
+        URL imageResource = RoboMain.class.getClassLoader().getResource("img/icon.png");
         Image icon = defaultToolkit.getImage(imageResource);
         Taskbar taskbar = Taskbar.getTaskbar();
         try {
