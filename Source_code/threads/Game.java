@@ -42,7 +42,7 @@ public class Game extends Thread {
 		// Initialize
 		Game.gpanel = gpanel;
 		
-		player = gpanel.getPlayer();
+		player = GamePanel.player;
 		
 		vScale = (float) omniFrame.getHeight()/768;
 		hScale = (float) omniFrame.getWidth()/1024;
@@ -76,13 +76,13 @@ public class Game extends Thread {
 				frameTime = System.currentTimeMillis();
 				
 				// Get information about the state of the game
-				player = gpanel.getPlayer();
-				vPlatforms = gpanel.getPlatform();
+				player = GamePanel.player;
+				vPlatforms = GamePanel.vPlatform;
 				currentStage = GamePanel.currentStage;
 				
 				// Update the cursor
 				listenerMouseMotion.settita();
-				
+
 				// Update player state using input feedback
 				player.setState(isRight,isLeft,dir,walkingDir,clicking);
 				// Interact with geometry
@@ -105,7 +105,7 @@ public class Game extends Thread {
 				}
 				
 				// Did game end?
-				if (!gpanel.getgameRun()) {
+				if (!GamePanel.gameRun) {
 					stopRun();
 				}
 			}
