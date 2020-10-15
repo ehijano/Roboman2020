@@ -13,6 +13,7 @@ public class Loot {
 	protected long spawnTime;
 	protected GamePanel gpInstance;
 	public double xA,yA,xB,yB,intersection;
+	protected static String imageFolder="img/";
 	
 	public Loot(GamePanel gp,Player player, int code, int x, int y) {
 		gpInstance = gp;
